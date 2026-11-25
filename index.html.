@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SECRET CHAT</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+
+* { box-sizing: border-box; }
+
+body {
+
+  margin: 0;
+
+  min-height: 100vh;
+
+  background: linear-gradient(145deg,#10091f,#241044,#10091f);
+
+  color: white;
+
+  font-family: Arial, sans-serif;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  padding: 24px;
+
+}
+
+main { width: 100%; max-width: 420px; text-align: center; }
+
+h1 { font-size: 36px; letter-spacing: 3px; }
+
+p { color: #c8b7e8; }
+
+input {
+
+  width: 100%; padding: 16px; border-radius: 14px;
+
+  border: 1px solid #8d5bd6; background: #211536;
+
+  color: white; font-size: 16px; margin: 20px 0;
+
+}
+
+button {
+
+  width: 100%; padding: 16px; margin: 8px 0;
+
+  border: 0; border-radius: 14px; background: #9147ff;
+
+  color: white; font-size: 16px; font-weight: bold;
+
+}
+
+.secondary { background: #392653; }
+
+#status { margin-top: 18px; min-height: 24px; }
+
+</style>
+
+</head>
+
+<body>
+
+<main>
+
+  <h1>SECRET CHAT</h1>
+
+  <p>Общайся анонимно. Находи новых людей.</p>
+
+  <input id="nickname" maxlength="20" placeholder="Придумай себе ник">
+
+  <button onclick="startSearch()">Начать поиск</button>
+
+  <button class="secondary" onclick="profile()">Моя анкета</button>
+
+  <button class="secondary" onclick="about()">О приложении</button>
+
+  <div id="status"></div>
+
+</main>
+
+<script>
+
+const tg = window.Telegram?.WebApp;
+
+tg?.ready();
+
+tg?.expand();
+
+function startSearch() {
+
+  const nick = document.getElementById('nickname').value.trim();
+
+  document.getElementById('status').textContent =
+
+    nick ? 'Интерфейс готов. Поиск собеседников пока не подключён.' :
+
+    'Сначала придумай себе ник.';
+
+}
+
+function profile() {
+
+  document.getElementById('status').textContent = 'Раздел анкеты скоро появится.';
+
+}
+
+function about() {
+
+  document.getElementById('status').textContent = 'SECRET CHAT — анонимное общение.';
+
+}
+
+</script>
+
+</body>
+
+</html>
