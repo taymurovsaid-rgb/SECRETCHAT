@@ -2,195 +2,152 @@
 const SUPABASE_URL = "https://wkcxzjcimjbsvdjveirt.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Mpl8U2ya5UCUcwfXvNSltA_I2jYuFA3";
 
-function askNickname() {
-  return new Promise((resolve) => {
-    const overlay = document.createElement("div");
+const status = document.getElementById("status");
+const findButton = document.getElementById("find-partner");
+const stopButton = document.getElementById("stop-search");
 
-    overlay.style.cssText = `
-      position:fixed;
-      inset:0;
-      background:#090414ee;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:99999;
-      padding:20px;
-      font-family:Arial;
-    `;
+let client;
+let searchTimer = null;
+let currentChatId = null;
 
-    const card = document.createElement("div");
-    card.style.cssText = `
-      background:#21143b;
-      color:white;
-      padding:25px;
-      border-radius:20px;
-      width:100%;
-      max-width:340px;
-      text-align:center;
-    `;
-
-    const title = document.createElement("h2");
-    title.textContent = "Придумай свой ник";
-
-    const input = document.createElement("input");
-    input.placeholder = "Например, Max123";
-    input.maxLength = 20;
-    input.style.cssText = `
-      width:100%;
-      box-sizing:border-box;
-      padding:14px;
-      border-radius:10px;
-      border:1px solid #9b5cff;
-      background:#120b20;
-      color:white;
-      font-size:16px;
-      margin:15px 0;
-    `;
-
-    const button = document.createElement("button");
-    button.textContent = "Продолжить";
-    button.style.cssText = `
-      width:100%;
-      padding:14px;
-      border:0;
-      border-radius:10px;
-      background:#9b5cff;
-      color:white;
-      font-size:16px;
-    `;
-
-    const error = document.createElement("p");
-    error.style.color = "#ff8b9b";
-
-    button.onclick = () => {
-      const nickname = input.value.trim();
-
-      if (nickname.length < 2 || nickname.length > 20) {
-        error.textContent = "Ник должен быть от 2 до 20 символов";
-        return;
-      }
-
-      overlay.remove();
-      resolve(nickname);
-    };
-
-    card.append(title, input, button, error);
-    overlay.appendChild(card);
-    document.body.appendChild(overlay);
-    input.focus();
-  });
+function showStatus(message) {
+  if (status) status.textContent = message;
 }
 
-async function startAnonymousLogin() {
-  const client = window.supabaseClient;
+async function init() {
+  const result = await client.auth.getSession();
+  if (result.error) throw result.error;
 
-  const sessionResult = await client.auth.getSession();
-
-  if (sessionResult.error) throw sessionResult.error;
-
-  let user = sessionResult.data.session?.user;
+  let user = result.data.session?.user;
 
   if (!user) {
-    const loginResult = await client.auth.signInAnonymously();
-
-    if (loginResult.error) throw loginResult.error;
-
-    user = loginResult.data.user;
+    const login = await client.auth.signInAnonymously();
+    if (login.error) throw login.error;
+    user = login.data.user;
   }
 
-  const profileResult = await client
-    .from("profiles")
+  let profile = await client.from("profiles")
     .select("id,nickname")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (profileResult.error) throw profileResult.error;
+  if (profile.error) throw profile.error;
 
-  let nickname;
-
-  if (!profileResult.data ||
-      !profileResult.data.nickname ||
-      profileResult.data.nickname === "Гость") {
-
-    nickname = await askNickname();
-
-    let saveResult;
-
-    if (!profileResult.data) {
-      saveResult = await client
-        .from("profiles")
-        .insert({
-          id: user.id,
-          nickname: nickname
-        });
-    } else {
-      saveResult = await client
-        .from("profiles")
-        .update({ nickname: nickname })
-        .eq("id", user.id);
+  if (!profile.data) {
+    const nickname = prompt("Придумай ник от 2 до 20 символов");
+    if (!nickname || nickname.trim().length < 2) {
+      throw new Error("Нужно указать ник");
     }
 
-    if (saveResult.error) throw saveResult.error;
+    const saved = await client.from("profiles").insert({
+      id: user.id,
+      nickname: nickname.trim().slice(0, 20)
+    });
 
-  } else {
-    nickname = profileResult.data.nickname;
+    if (saved.error) throw saved.error;
   }
 
-  const nicknameInput = document.getElementById("nickname");
-
-  if (nicknameInput) {
-    nicknameInput.value = nickname;
-  }
-
-  const status = document.getElementById("status");
-
-  if (status) {
-    status.textContent = "Привет, " + nickname + "! Ты готов к общению.";
-  }
-
-  const findButton = document.getElementById("find-partner");
-  const stopButton = document.getElementById("stop-search");
-
-  if (findButton) {
-    findButton.onclick = () => {
-      status.textContent = "Настоящий поиск собеседника ещё подключается.";
-      findButton.style.display = "none";
-      stopButton.style.display = "block";
-    };
-  }
-
-  if (stopButton) {
-    stopButton.onclick = () => {
-      status.textContent = "Поиск остановлен.";
-      stopButton.style.display = "none";
-      findButton.style.display = "block";
-    };
-  }
-
-  console.log("SECRET CHAT: профиль готов!", nickname);
+  showStatus("Ты в SECRET CHAT. Можешь искать собеседника!");
+  findButton.onclick = startSearch;
+  stopButton.onclick = stopSearch;
 }
 
-const supabaseScript = document.createElement("script");
-
-supabaseScript.src =
-  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-
-supabaseScript.onload = async () => {
-  window.supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+async function startSearch() {
+  findButton.disabled = true;
+  showStatus("Ищем собеседника...");
 
   try {
-    await startAnonymousLogin();
+    const result = await client.rpc("start_random_search");
+    if (result.error) throw result.error;
+
+    const match = result.data?.[0];
+
+    if (match?.status === "matched") {
+      currentChatId = match.chat_id;
+      showStatus("Собеседник найден! Подключаем чат...");
+      findButton.style.display = "none";
+      stopButton.style.display = "none";
+      await openChat(currentChatId);
+      return;
+    }
+
+    showStatus("Ожидаем собеседника...");
+    findButton.style.display = "none";
+    stopButton.style.display = "block";
+
+    searchTimer = setInterval(checkSearch, 3000);
   } catch (error) {
-    console.error("Ошибка SECRET CHAT:", error);
-    alert("Ошибка: " + error.message);
+    showStatus("Ошибка поиска: " + error.message);
+    findButton.disabled = false;
+  }
+}
+
+async function checkSearch() {
+  try {
+    const result = await client.rpc("start_random_search");
+    if (result.error) throw result.error;
+
+    const match = result.data?.[0];
+
+    if (match?.status === "matched") {
+      clearInterval(searchTimer);
+      searchTimer = null;
+      currentChatId = match.chat_id;
+      showStatus("Собеседник найден!");
+      stopButton.style.display = "none";
+      await openChat(currentChatId);
+    }
+  } catch (error) {
+    clearInterval(searchTimer);
+    searchTimer = null;
+    showStatus("Ошибка: " + error.message);
+  }
+}
+
+async function stopSearch() {
+  if (searchTimer) clearInterval(searchTimer);
+  searchTimer = null;
+
+  const result = await client.rpc("stop_random_search");
+  if (result.error) {
+    showStatus("Не удалось остановить поиск: " + result.error.message);
+    return;
+  }
+
+  stopButton.style.display = "none";
+  findButton.style.display = "block";
+  findButton.disabled = false;
+  showStatus("Поиск остановлен.");
+}
+
+async function openChat(chatId) {
+  const partner = await client.rpc("get_chat_partner", {
+    p_chat_id: chatId
+  });
+
+  if (partner.error) {
+    showStatus("Ошибка открытия чата: " + partner.error.message);
+    return;
+  }
+
+  showStatus("Ты общаешься с " +
+    (partner.data?.[0]?.nickname || "Анонимом") +
+    ". Интерфейс переписки подключим следующим шагом.");
+}
+
+const script = document.createElement("script");
+script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+
+script.onload = async () => {
+  client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  try {
+    await init();
+  } catch (error) {
+    console.error(error);
+    showStatus("Ошибка подключения: " + error.message);
   }
 };
 
-supabaseScript.onerror = () => {
-  alert("Не удалось подключиться к Supabase");
-};
-
-document.head.appendChild(supabaseScript);
+script.onerror = () => showStatus("Не удалось загрузить Supabase");
+document.head.appendChild(script);
