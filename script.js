@@ -25,3 +25,6 @@ async function startAnonymousLogin() {
   console.log("SECRET CHAT: анонимный вход выполнен");
   console.log("User ID:", data.user.id);
 }
+window.addEventListener("load", () => {
+  startAnonymousLogin();
+});
