@@ -52,3 +52,6 @@ window.addEventListener("load", () => {
 
   console.log("Профиль создан!");
 }
+window.addEventListener("load", () => {
+  startAnonymousLogin();
+});
