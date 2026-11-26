@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#d71935">
   <title>SECRET CHAT</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -16,83 +17,158 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: linear-gradient(145deg, #10091f, #241044, #10091f);
-      color: white;
+      background: #ffffff;
+      color: #222222;
       font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 24px;
+    }
+
+    .header {
+      background: #d71935;
+      color: white;
+      min-height: 43vh;
+      padding: 35px 22px 55px;
+      text-align: center;
+      border-radius: 0 0 35px 35px;
+    }
+
+    .logo {
+      font-size: 29px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      margin-top: 20px;
+    }
+
+    .online {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 7px 15px;
+      border: 1px solid #ffffff88;
+      border-radius: 30px;
+      font-size: 12px;
+    }
+
+    .header h1 {
+      font-size: 29px;
+      line-height: 1.25;
+      margin-top: 35px;
+    }
+
+    .header p {
+      color: #ffe4e8;
+      font-size: 15px;
     }
 
     main {
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
+      margin: -28px auto 0;
+      padding: 0 22px 35px;
+      position: relative;
+    }
+
+    .card {
+      background: white;
+      border: 2px solid #d71935;
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 8px 25px #00000010;
+    }
+
+    .card-title {
+      color: #d71935;
+      font-size: 19px;
+      font-weight: bold;
       text-align: center;
-    }
-
-    h1 {
-      font-size: 36px;
-      letter-spacing: 3px;
-    }
-
-    p {
-      color: #c8b7e8;
-    }
-
-    input {
-      width: 100%;
-      padding: 16px;
-      border-radius: 14px;
-      border: 1px solid #8d5bd6;
-      background: #211536;
-      color: white;
-      font-size: 16px;
-      margin: 20px 0;
+      margin-bottom: 18px;
     }
 
     button {
       width: 100%;
-      padding: 16px;
-      margin: 8px 0;
+      padding: 17px 12px;
       border: 0;
       border-radius: 14px;
-      background: #9147ff;
-      color: white;
       font-size: 16px;
       font-weight: bold;
+      cursor: pointer;
+      margin: 7px 0;
+    }
+
+    #find-partner {
+      background: #d71935;
+      color: white;
+    }
+
+    #stop-search {
+      background: white;
+      color: #d71935;
+      border: 2px solid #d71935;
+      display: none;
     }
 
     .secondary {
-      background: #392653;
+      background: #fff0f2;
+      color: #c41430;
+      border: 1px solid #f0b8c1;
     }
 
     #status {
-      margin-top: 18px;
-      min-height: 24px;
+      text-align: center;
+      color: #d71935;
+      min-height: 25px;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .footer {
+      text-align: center;
+      color: #999999;
+      font-size: 12px;
+      margin-top: 25px;
     }
   </style>
 </head>
 
 <body>
+
+  <header class="header">
+    <div class="logo">SECRET CHAT</div>
+    <div class="online">● АНОНИМНОЕ ОБЩЕНИЕ</div>
+
+    <h1>НАЙДИ НОВЫХ<br>СОБЕСЕДНИКОВ</h1>
+
+    <p>Общайся свободно. Оставайся собой.</p>
+  </header>
+
   <main>
-    <h1>SECRET CHAT</h1>
+    <section class="card">
 
-    <p>Общайся анонимно. Находи новых людей.</p>
+      <div class="card-title">ТВОЙ АНОНИМНЫЙ ЧАТ</div>
 
-    <input id="nickname" maxlength="20" placeholder="Придумай себе ник">
+      <button id="find-partner">
+        🔍 НАЙТИ СОБЕСЕДНИКА
+      </button>
 
-    <button id="find-partner">🔍 Найти собеседника</button>
+      <button id="stop-search">
+        ✖ ОСТАНОВИТЬ ПОИСК
+      </button>
 
-    <button id="stop-search" class="secondary" style="display:none;">
-      ✖ Остановить поиск
+      <div id="status">
+        Готов к новым знакомствам?
+      </div>
+
+    </section>
+
+    <button class="secondary" onclick="profile()">
+      👤 Моя анкета
     </button>
 
-    <button class="secondary" onclick="profile()">Моя анкета</button>
+    <button class="secondary" onclick="about()">
+      ℹ️ О приложении
+    </button>
 
-    <button class="secondary" onclick="about()">О приложении</button>
-
-    <div id="status"></div>
+    <div class="footer">
+      SECRET CHAT · ТВОЁ ПРОСТРАНСТВО ОБЩЕНИЯ
+    </div>
   </main>
 
   <script>
@@ -102,16 +178,27 @@
     tg?.expand();
 
     function profile() {
-      document.getElementById('status').textContent =
-        'Раздел анкеты скоро появится.';
+      document.getElementById("status").textContent =
+        "Раздел анкеты скоро появится.";
     }
 
     function about() {
-      document.getElementById('status').textContent =
-        'SECRET CHAT — анонимное общение.';
+      document.getElementById("status").textContent =
+        "SECRET CHAT — анонимное общение.";
     }
+
+    document.getElementById("find-partner").onclick = function() {
+      document.getElementById("status").textContent =
+        "Система поиска собеседников пока подключается.";
+    };
+
+    document.getElementById("stop-search").onclick = function() {
+      document.getElementById("status").textContent =
+        "Поиск остановлен.";
+    };
   </script>
 
   <script src="script.js"></script>
+
 </body>
 </html>
