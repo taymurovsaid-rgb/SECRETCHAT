@@ -1,147 +1,117 @@
+
 <!DOCTYPE html>
-
 <html lang="ru">
-
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SECRET CHAT</title>
 
-<meta charset="UTF-8">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<title>SECRET CHAT</title>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(145deg, #10091f, #241044, #10091f);
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+    main {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
 
-<style>
+    h1 {
+      font-size: 36px;
+      letter-spacing: 3px;
+    }
 
-* { box-sizing: border-box; }
+    p {
+      color: #c8b7e8;
+    }
 
-body {
+    input {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid #8d5bd6;
+      background: #211536;
+      color: white;
+      font-size: 16px;
+      margin: 20px 0;
+    }
 
-  margin: 0;
+    button {
+      width: 100%;
+      padding: 16px;
+      margin: 8px 0;
+      border: 0;
+      border-radius: 14px;
+      background: #9147ff;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+    }
 
-  min-height: 100vh;
+    .secondary {
+      background: #392653;
+    }
 
-  background: linear-gradient(145deg,#10091f,#241044,#10091f);
-
-  color: white;
-
-  font-family: Arial, sans-serif;
-
-  display: flex;
-
-  justify-content: center;
-
-  align-items: center;
-
-  padding: 24px;
-
-}
-
-main { width: 100%; max-width: 420px; text-align: center; }
-
-h1 { font-size: 36px; letter-spacing: 3px; }
-
-p { color: #c8b7e8; }
-
-input {
-
-  width: 100%; padding: 16px; border-radius: 14px;
-
-  border: 1px solid #8d5bd6; background: #211536;
-
-  color: white; font-size: 16px; margin: 20px 0;
-
-}
-
-button {
-
-  width: 100%; padding: 16px; margin: 8px 0;
-
-  border: 0; border-radius: 14px; background: #9147ff;
-
-  color: white; font-size: 16px; font-weight: bold;
-
-}
-
-.secondary { background: #392653; }
-
-#status { margin-top: 18px; min-height: 24px; }
-
-</style>
-
+    #status {
+      margin-top: 18px;
+      min-height: 24px;
+    }
+  </style>
 </head>
 
 <body>
+  <main>
+    <h1>SECRET CHAT</h1>
 
-<main>
+    <p>Общайся анонимно. Находи новых людей.</p>
 
-  <h1>SECRET CHAT</h1>
+    <input id="nickname" maxlength="20" placeholder="Придумай себе ник">
 
-  <p>Общайся анонимно. Находи новых людей.</p>
+    <button id="find-partner">🔍 Найти собеседника</button>
 
-  <input id="nickname" maxlength="20" placeholder="Придумай себе ник">
+    <button id="stop-search" class="secondary" style="display:none;">
+      ✖ Остановить поиск
+    </button>
 
-  <button onclick="startSearch()">Начать поиск</button>
+    <button class="secondary" onclick="profile()">Моя анкета</button>
 
-  <button class="secondary" onclick="profile()">Моя анкета</button>
+    <button class="secondary" onclick="about()">О приложении</button>
 
-  <button class="secondary" onclick="about()">О приложении</button>
+    <div id="status"></div>
+  </main>
 
-  <div id="status"></div>
+  <script>
+    const tg = window.Telegram?.WebApp;
 
-</main>
+    tg?.ready();
+    tg?.expand();
 
-<script>
+    function profile() {
+      document.getElementById('status').textContent =
+        'Раздел анкеты скоро появится.';
+    }
 
-const tg = window.Telegram?.WebApp;
+    function about() {
+      document.getElementById('status').textContent =
+        'SECRET CHAT — анонимное общение.';
+    }
+  </script>
 
-tg?.ready();
-
-tg?.expand();
-
-function startSearch() {
-
-  const nick = document.getElementById('nickname').value.trim();
-
-  document.getElementById('status').textContent =
-
-    nick ? 'Интерфейс готов. Поиск собеседников пока не подключён.' :
-
-    'Сначала придумай себе ник.';
-
-}
-
-function profile() {
-
-  document.getElementById('status').textContent = 'Раздел анкеты скоро появится.';
-
-}
-
-function about() {
-
-  document.getElementById('status').textContent = 'SECRET CHAT — анонимное общение.';
-
-}
-
-</script>
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
-<div id="search-panel" style="text-align:center;margin:25px 0;">
-  <button id="find-partner" style="
-    background:#9b5cff;color:white;border:0;
-    padding:16px 30px;border-radius:14px;
-    font-size:17px;width:90%;max-width:320px;">
-    🔍 Найти собеседника
-  </button>
-
-  <button id="stop-search" style="
-    display:none;background:#403052;color:white;
-    border:0;padding:16px 30px;border-radius:14px;
-    font-size:17px;width:90%;max-width:320px;margin-top:12px;">
-    ✖ Остановить поиск
-  </button>
-
-  <p id="search-status" style="color:white;margin-top:15px;"></p>
-</div>
 </html>
