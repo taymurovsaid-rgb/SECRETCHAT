@@ -4,14 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10091f">
   <title>SECRET CHAT</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -36,11 +35,9 @@
       letter-spacing: 3px;
     }
 
-    p {
-      color: #c8b7e8;
-    }
+    p { color: #c8b7e8; }
 
-    input {
+    #nickname {
       width: 100%;
       padding: 16px;
       border-radius: 14px;
@@ -61,15 +58,17 @@
       color: white;
       font-size: 16px;
       font-weight: bold;
+      cursor: pointer;
     }
 
-    .secondary {
-      background: #392653;
-    }
+    .secondary { background: #392653; }
+
+    #stop-search { display: none; }
 
     #status {
       margin-top: 18px;
       min-height: 24px;
+      color: #c8b7e8;
     }
   </style>
 </head>
@@ -77,39 +76,54 @@
 <body>
   <main>
     <h1>SECRET CHAT</h1>
-
     <p>Общайся анонимно. Находи новых людей.</p>
 
-    <input id="nickname" maxlength="20" placeholder="Придумай себе ник">
+    <input id="nickname" maxlength="20"
+      placeholder="Придумай себе ник" disabled>
 
-    <button id="find-partner">🔍 Найти собеседника</button>
+    <button id="find-partner">🔍 НАЧАТЬ ПОИСК</button>
 
-    <button id="stop-search" class="secondary" style="display:none;">
-      ✖ Остановить поиск
+    <button id="stop-search" class="secondary">
+      ✖ ОСТАНОВИТЬ ПОИСК
     </button>
 
-    <button class="secondary" onclick="profile()">Моя анкета</button>
+    <button class="secondary" id="profile-button">
+      👤 МОЯ АНКЕТА
+    </button>
 
-    <button class="secondary" onclick="about()">О приложении</button>
+    <button class="secondary" id="about-button">
+      ℹ️ О ПРИЛОЖЕНИИ
+    </button>
 
-    <div id="status"></div>
+    <div id="status">Подключаем SECRET CHAT...</div>
   </main>
 
   <script>
     const tg = window.Telegram?.WebApp;
-
     tg?.ready();
     tg?.expand();
 
-    function profile() {
-      document.getElementById('status').textContent =
-        'Раздел анкеты скоро появится.';
-    }
+    document.getElementById("profile-button").onclick = () => {
+      document.getElementById("status").textContent =
+        "Твоя анкета будет доступна здесь.";
+    };
 
-    function about() {
-      document.getElementById('status').textContent =
-        'SECRET CHAT — анонимное общение.';
-    }
+    document.getElementById("about-button").onclick = () => {
+      document.getElementById("status").textContent =
+        "SECRET CHAT — пространство анонимного общения.";
+    };
+
+    document.getElementById("find-partner").onclick = () => {
+      document.getElementById("status").textContent =
+        "Система поиска собеседников пока подключается.";
+    };
+
+    document.getElementById("stop-search").onclick = () => {
+      document.getElementById("status").textContent =
+        "Поиск остановлен.";
+      document.getElementById("stop-search").style.display = "none";
+      document.getElementById("find-partner").style.display = "block";
+    };
   </script>
 
   <script src="script.js"></script>
