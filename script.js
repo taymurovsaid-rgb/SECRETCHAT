@@ -26,5 +26,29 @@ async function startAnonymousLogin() {
   console.log("User ID:", data.user.id);
 }
 window.addEventListener("load", () => {
-  startAnonymousLogin();
-});
+  async function startAnonymousLogin() {
+  const { data, error } =
+    await window.supabaseClient.auth.signInAnonymously();
+
+  if (error) {
+    console.error("Ошибка входа:", error.message);
+    return;
+  }
+
+  const user = data.user;
+
+  const { error: profileError } =
+    await window.supabaseClient
+      .from("profiles")
+      .insert({
+        id: user.id,
+        nickname: "Гость"
+      });
+
+  if (profileError) {
+    console.error("Ошибка профиля:", profileError.message);
+    return;
+  }
+
+  console.log("Профиль создан!");
+}
