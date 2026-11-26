@@ -13,3 +13,15 @@ supabaseScript.onload = () => {
 };
 
 document.head.appendChild(supabaseScript);
+async function startAnonymousLogin() {
+  const { data, error } =
+    await window.supabaseClient.auth.signInAnonymously();
+
+  if (error) {
+    console.error("Ошибка входа:", error.message);
+    return;
+  }
+
+  console.log("SECRET CHAT: анонимный вход выполнен");
+  console.log("User ID:", data.user.id);
+}
