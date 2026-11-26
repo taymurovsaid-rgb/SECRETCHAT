@@ -1,19 +1,31 @@
+
 const SUPABASE_URL = "https://wkcxzjcimjbsvdjveirt.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Mpl8U2ya5UCUcwfXvNSltA_I2jYuFA3";
 
 function askNickname() {
   return new Promise((resolve) => {
     const overlay = document.createElement("div");
+
     overlay.style.cssText = `
-      position:fixed;inset:0;background:#090414ee;
-      display:flex;align-items:center;justify-content:center;
-      z-index:99999;padding:20px;font-family:Arial;
+      position:fixed;
+      inset:0;
+      background:#090414ee;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:99999;
+      padding:20px;
+      font-family:Arial;
     `;
 
     const card = document.createElement("div");
     card.style.cssText = `
-      background:#21143b;color:white;padding:25px;
-      border-radius:20px;width:100%;max-width:340px;
+      background:#21143b;
+      color:white;
+      padding:25px;
+      border-radius:20px;
+      width:100%;
+      max-width:340px;
       text-align:center;
     `;
 
@@ -24,17 +36,27 @@ function askNickname() {
     input.placeholder = "Например, Max123";
     input.maxLength = 20;
     input.style.cssText = `
-      width:100%;box-sizing:border-box;padding:14px;
-      border-radius:10px;border:1px solid #9b5cff;
-      background:#120b20;color:white;font-size:16px;
+      width:100%;
+      box-sizing:border-box;
+      padding:14px;
+      border-radius:10px;
+      border:1px solid #9b5cff;
+      background:#120b20;
+      color:white;
+      font-size:16px;
       margin:15px 0;
     `;
 
     const button = document.createElement("button");
     button.textContent = "Продолжить";
     button.style.cssText = `
-      width:100%;padding:14px;border:0;border-radius:10px;
-      background:#9b5cff;color:white;font-size:16px;
+      width:100%;
+      padding:14px;
+      border:0;
+      border-radius:10px;
+      background:#9b5cff;
+      color:white;
+      font-size:16px;
     `;
 
     const error = document.createElement("p");
@@ -62,38 +84,45 @@ function askNickname() {
 async function startAnonymousLogin() {
   const client = window.supabaseClient;
 
-  let { data, error } = await client.auth.getSession();
+  const sessionResult = await client.auth.getSession();
 
-  if (error) throw error;
+  if (sessionResult.error) throw sessionResult.error;
 
-  let user = data.session?.user;
+  let user = sessionResult.data.session?.user;
 
   if (!user) {
-    const result = await client.auth.signInAnonymously();
-    if (result.error) throw result.error;
-    user = result.data.user;
+    const loginResult = await client.auth.signInAnonymously();
+
+    if (loginResult.error) throw loginResult.error;
+
+    user = loginResult.data.user;
   }
 
-  const result = await client
+  const profileResult = await client
     .from("profiles")
     .select("id,nickname")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (result.error) throw result.error;
+  if (profileResult.error) throw profileResult.error;
 
   let nickname;
 
-  if (!result.data || result.data.nickname === "Гость") {
+  if (!profileResult.data ||
+      !profileResult.data.nickname ||
+      profileResult.data.nickname === "Гость") {
+
     nickname = await askNickname();
 
     let saveResult;
 
-    if (!result.data) {
-      saveResult = await client.from("profiles").insert({
-        id: user.id,
-        nickname: nickname
-      });
+    if (!profileResult.data) {
+      saveResult = await client
+        .from("profiles")
+        .insert({
+          id: user.id,
+          nickname: nickname
+        });
     } else {
       saveResult = await client
         .from("profiles")
@@ -102,14 +131,47 @@ async function startAnonymousLogin() {
     }
 
     if (saveResult.error) throw saveResult.error;
+
   } else {
-    nickname = result.data.nickname;
+    nickname = profileResult.data.nickname;
+  }
+
+  const nicknameInput = document.getElementById("nickname");
+
+  if (nicknameInput) {
+    nicknameInput.value = nickname;
+  }
+
+  const status = document.getElementById("status");
+
+  if (status) {
+    status.textContent = "Привет, " + nickname + "! Ты готов к общению.";
+  }
+
+  const findButton = document.getElementById("find-partner");
+  const stopButton = document.getElementById("stop-search");
+
+  if (findButton) {
+    findButton.onclick = () => {
+      status.textContent = "Настоящий поиск собеседника ещё подключается.";
+      findButton.style.display = "none";
+      stopButton.style.display = "block";
+    };
+  }
+
+  if (stopButton) {
+    stopButton.onclick = () => {
+      status.textContent = "Поиск остановлен.";
+      stopButton.style.display = "none";
+      findButton.style.display = "block";
+    };
   }
 
   console.log("SECRET CHAT: профиль готов!", nickname);
 }
 
 const supabaseScript = document.createElement("script");
+
 supabaseScript.src =
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
 
@@ -122,8 +184,8 @@ supabaseScript.onload = async () => {
   try {
     await startAnonymousLogin();
   } catch (error) {
-    console.error("Ошибка SECRET CHAT:", error.message);
-    alert("Не удалось сохранить профиль: " + error.message);
+    console.error("Ошибка SECRET CHAT:", error);
+    alert("Ошибка: " + error.message);
   }
 };
 
